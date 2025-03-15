@@ -1,0 +1,4 @@
+*.env
+*.jsonl
+*.gif
+venv
