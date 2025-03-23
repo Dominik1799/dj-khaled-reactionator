@@ -21,10 +21,13 @@ public class GifMetadata extends PanacheEntityBase {
     public String mediaDirectoryFileName;
 
     @PrePersist
-    protected void setTimestamps() {
-        if (this.created == null) {
-            this.created = OffsetDateTime.now();
-        }
+    protected void setTimestampsPersist() {
+        this.created = OffsetDateTime.now();
+        this.updated = OffsetDateTime.now();
+    }
+
+    @PreUpdate
+    protected void setTimestampsUpdate() {
         this.updated = OffsetDateTime.now();
     }
 }

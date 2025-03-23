@@ -2,9 +2,12 @@ gif:
   mediaDirectoryPath: ${GIF_DIRECTORY:stored_gifs}
 
 quarkus:
+  rest-client:
+    chroma-rest-client:
+      url: ${CHROMA_URL:http://localhost:15432}
   datasource:
     devservices:
-      enabled: true
+      enabled: false
       port: 5432
       username: postgres
       password: postgres
@@ -12,12 +15,23 @@ quarkus:
       volumes:
         dev-data-volume: /var/lib/postgresql/data
     db-kind: postgresql
-    username: postgres
-    password: postgres
+    username: ${POSTGRESQL_USERNAME:postgres}
+    password: ${POSTGRESQL_PASSWORD:postgres}
     jdbc:
-      url: jdbc:postgresql://localhost:5432/dj-khaled-reactionator
+      url: jdbc:postgresql://${POSTGRESQL_HOST:localhost}:${POSTGRESQL_PORT:5432}/${POSTGRESQL_DB:dj-khaled-reactionator}
     log:
       sql: true
+
+  langchain4j:
+    openai:
+      api-key: ${OPENAI_API_KEY:key}
+      embedding-model:
+        model-name: text-embedding-3-small
+    chroma:
+      devservices:
+        enabled: false
+      url: ${CHROMA_URL:http://localhost:15432}
+      collection-name: dj-khaled-reactionator-collection
 
   hibernate-orm:
     database:

@@ -2,12 +2,15 @@ api functions:
 
 
 1. POST /upload
+
 upload 1 or more gifs to the db, without metadata
 
 2. GET /search?query=${text}
+
 semantically search saved gifs via their metadata
 
-3. PUT /gif/{id}?tags=${text_list}&description=${text}
+3. PUT /gif/{id}?name=\${text_list}\&description=\${text}
+
 update gif metadata
 
 4. GET /gif
