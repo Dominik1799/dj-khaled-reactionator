@@ -1,0 +1,28 @@
+gif:
+  mediaDirectoryPath: ${GIF_DIRECTORY:stored_gifs}
+
+quarkus:
+  datasource:
+    devservices:
+      enabled: true
+      port: 5432
+      username: postgres
+      password: postgres
+      db-name: dj-khaled-reactionator
+      volumes:
+        dev-data-volume: /var/lib/postgresql/data
+    db-kind: postgresql
+    username: postgres
+    password: postgres
+    jdbc:
+      url: jdbc:postgresql://localhost:5432/dj-khaled-reactionator
+    log:
+      sql: true
+
+  hibernate-orm:
+    database:
+      generation: validate
+
+  liquibase:
+    migrate-at-start: true
+    change-log: db/changelog.xml
