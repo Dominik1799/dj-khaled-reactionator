@@ -1,9 +1,15 @@
 package org.acme.service;
 
 import dev.langchain4j.data.document.Metadata;
+import dev.langchain4j.rag.content.retriever.EmbeddingStoreContentRetriever;
+import dev.langchain4j.rag.query.Query;
+import io.quarkus.hibernate.orm.panache.PanacheQuery;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import org.acme.entities.GifResponseEntity;
 import org.acme.entities.GifUploadEntity;
 import org.acme.persistence.GifMetadata;
 import org.acme.rest.ChromaRestClient;
@@ -21,13 +27,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 @ApplicationScoped
 public class GifService {
+
+    private static final String DOCUMENT_METADATA_DB_ID_KEY = "database_id";
 
     @Inject
     ChromaEmbeddingStore store;
@@ -46,6 +51,20 @@ public class GifService {
     String chromaCollectionName;
 
     private static final Logger LOGGER = Logger.getLogger(GifService.class);
+
+
+    public GifResponseEntity getGifs(Integer page, Integer pageSize, Boolean onlyNullDescription) {
+        PanacheQuery<GifMetadata> query;
+        if (onlyNullDescription) {
+            query = GifMetadata.find("description is null");
+        } else {
+            query = GifMetadata.findAll();
+        }
+        query.page(page, pageSize);
+        var result = query.list();
+        return new GifResponseEntity(result, page, pageSize, query.pageCount());
+
+    }
 
     // return true if success, false if something failed
     @Transactional
@@ -95,7 +114,7 @@ public class GifService {
                 .embeddingModel(embeddingModel)
                 .build();
         Map<String, String> metadataMap = new HashMap<>();
-        metadataMap.put("database_id", gifId.toString());
+        metadataMap.put(DOCUMENT_METADATA_DB_ID_KEY, gifId.toString());
         var document = Document.from(description, Metadata.from(metadataMap));
         ingestor.ingest(document);
     }
@@ -106,7 +125,7 @@ public class GifService {
         // the collection was not created yet
         if (collectionId == null)
             return;
-        Map<String, String> innerFilter = Map.of("database_id", documentDatabaseId);
+        Map<String, String> innerFilter = Map.of(DOCUMENT_METADATA_DB_ID_KEY, documentDatabaseId);
         var filter = Map.of("where", innerFilter);
         chromaRestClient.deleteDocumentsByWhereFilter(collectionId, filter);
     }
@@ -121,5 +140,28 @@ public class GifService {
             }
         }
         return null;
+    }
+
+    public Response getGifMedia(UUID gifId) throws IOException {
+        GifMetadata gifMetadata = GifMetadata.findById(gifId);
+        Path destination = Path.of(uploadDir, gifMetadata.mediaDirectoryFileName);
+        File file = destination.toFile();
+        if (!file.exists()) {
+            return Response.status(Response.Status.NOT_FOUND).entity("GIF not found").build();
+        }
+        byte[] gifData = Files.readAllBytes(destination);
+        return Response.ok(gifData).type(MediaType.valueOf("image/gif")).build();
+    }
+
+    public List<String> searchGifs(String query) {
+        EmbeddingStoreContentRetriever retriever = EmbeddingStoreContentRetriever.builder()
+                .embeddingStore(store)
+                .embeddingModel(embeddingModel)
+                .maxResults(5)
+                .build();
+        var searchResult = retriever.retrieve(Query.from(query));
+        return searchResult.stream()
+                .map(sr -> sr.textSegment().metadata().getString(DOCUMENT_METADATA_DB_ID_KEY))
+                .toList();
     }
 }
