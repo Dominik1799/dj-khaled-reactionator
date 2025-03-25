@@ -164,4 +164,16 @@ public class GifService {
                 .map(sr -> sr.textSegment().metadata().getString(DOCUMENT_METADATA_DB_ID_KEY))
                 .toList();
     }
+
+    @Transactional
+    public Response deleteGif(UUID id) {
+        GifMetadata gifMetadata = GifMetadata.findById(id);
+        if (gifMetadata == null) {
+            return Response.status(Response.Status.NOT_FOUND).entity("GIF not found").build();
+        }
+        deleteDocumentInChromaByDatabaseId(id.toString());
+        gifMetadata.delete();
+
+        return Response.ok().build();
+    }
 }

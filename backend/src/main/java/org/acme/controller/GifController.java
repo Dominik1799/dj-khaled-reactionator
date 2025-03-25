@@ -75,4 +75,10 @@ public class GifController {
         gifService.addMetadataToGif(id, name, description);
         return Response.ok().build();
     }
+
+    @DELETE
+    @Path("/{id}")
+    public Response deleteGif(@PathParam("id") UUID id) {
+        return gifService.deleteGif(id);
+    }
 }
