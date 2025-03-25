@@ -50,7 +50,7 @@ public class GifController {
     @GET
     @Path("/gif/media/{id}")
     @Produces("image/gif")
-    public Response getGifMedia(@QueryParam("id") @NotNull UUID id) throws IOException {
+    public Response getGifMedia(@PathParam("id") @NotNull UUID id) throws IOException {
         return gifService.getGifMedia(id);
 
     }

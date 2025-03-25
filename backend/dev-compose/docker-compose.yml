@@ -4,7 +4,7 @@ services:
   chromadb-ui:
     image: fengzhichao/chromadb-admin
     ports:
-      - "3000:3000"
+      - "3001:3000"
   chromadb:
     image: ghcr.io/chroma-core/chroma:0.4.15
     container_name: chromadb
