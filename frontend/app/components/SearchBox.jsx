@@ -20,7 +20,6 @@ export default function SearchArea() {
         throw new Error('Search failed');
       }
       const data = await response.json();
-      console.log(data);
       setSearchResults(data);
     } catch (error) {
       console.error('Error searching:', error);
