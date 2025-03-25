@@ -1,5 +1,8 @@
 # DJ KHALED reactionator
 
+Monorepo for ease of development and deployment
+
+
 Features:
 
 * gif managament dashboard - adding description to gifs so it can be vectorized
