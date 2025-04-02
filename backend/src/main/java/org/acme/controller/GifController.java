@@ -1,7 +1,6 @@
 package org.acme.controller;
 
 import io.smallrye.common.constraint.NotNull;
-import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
