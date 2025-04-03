@@ -4,7 +4,7 @@ gif:
 quarkus:
   http:
     limits:
-      max-body-size: 500M
+      max-body-size: 100M
   rest-client:
     chroma-rest-client:
       url: ${CHROMA_URL:http://localhost:15432}

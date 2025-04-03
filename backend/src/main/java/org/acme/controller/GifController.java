@@ -27,7 +27,7 @@ public class GifController {
     @Produces(MediaType.APPLICATION_JSON)
     public GifResponseEntity getGifs(@QueryParam("page") @NotNull Integer page,
                                      @QueryParam("pageSize") @NotNull Integer pageSize,
-                                     @QueryParam("onlyNullDescrition") @NotNull Boolean onlyNullDescription) {
+                                     @QueryParam("onlyNullDescription") @NotNull Boolean onlyNullDescription) {
         return gifService.getGifs(page, pageSize, onlyNullDescription);
 
     }
@@ -67,7 +67,7 @@ public class GifController {
     }
 
     @PUT
-    @Path("/{id}")
+    @Path("/gif/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response updateGifMetadata(@PathParam("id") UUID id,
                                       @QueryParam("name") String name,
@@ -77,7 +77,7 @@ public class GifController {
     }
 
     @DELETE
-    @Path("/{id}")
+    @Path("/gif/{id}")
     public Response deleteGif(@PathParam("id") UUID id) {
         return gifService.deleteGif(id);
     }

@@ -4,6 +4,7 @@ import dev.langchain4j.data.document.Metadata;
 import dev.langchain4j.rag.content.retriever.EmbeddingStoreContentRetriever;
 import dev.langchain4j.rag.query.Query;
 import io.quarkus.hibernate.orm.panache.PanacheQuery;
+import io.quarkus.panache.common.Sort;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -56,9 +57,9 @@ public class GifService {
     public GifResponseEntity getGifs(Integer page, Integer pageSize, Boolean onlyNullDescription) {
         PanacheQuery<GifMetadata> query;
         if (onlyNullDescription) {
-            query = GifMetadata.find("description is null");
+            query = GifMetadata.find("description is null", Sort.descending("updated"));
         } else {
-            query = GifMetadata.findAll();
+            query = GifMetadata.findAll(Sort.descending("updated"));
         }
         query.page(page, pageSize);
         var result = query.list();
@@ -173,7 +174,9 @@ public class GifService {
         }
         deleteDocumentInChromaByDatabaseId(id.toString());
         gifMetadata.delete();
-
+        Path destination = Path.of(uploadDir, gifMetadata.mediaDirectoryFileName);
+        File file = destination.toFile();
+        file.delete();
         return Response.ok().build();
     }
 }

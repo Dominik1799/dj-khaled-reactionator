@@ -33,6 +33,8 @@ export default function GifUpload() {
         // Clear the form after successful upload
         setSelectedFiles([]);
         alert('GIFs uploaded successfully!');
+        // refresh the page
+        window.location.reload(); 
       } catch (error) {
         console.error('Error uploading GIFs:', error);
         alert('Failed to upload GIFs');
