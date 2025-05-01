@@ -29,11 +29,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class GifService {
 
     private static final String DOCUMENT_METADATA_DB_ID_KEY = "database_id";
+    private static final String DOCUMENT_METADATA_FULL_DOCUMENT_TEXT_KEY = "document_text";
 
     @Inject
     ChromaEmbeddingStore store;
@@ -57,7 +59,7 @@ public class GifService {
     public GifResponseEntity getGifs(Integer page, Integer pageSize, Boolean onlyNullDescription) {
         PanacheQuery<GifMetadata> query;
         if (onlyNullDescription) {
-            query = GifMetadata.find("description is null", Sort.descending("updated"));
+            query = GifMetadata.find("descriptions is empty", Sort.descending("updated"));
         } else {
             query = GifMetadata.findAll(Sort.descending("updated"));
         }
@@ -95,14 +97,19 @@ public class GifService {
         }
     }
 
+    // NOTE: this can be more effective, this basically expects an array of descriptions that can come in.
+    // It does not check if there is already said description for a particular gif, so it deletes all descriptions
+    // and re-indexes everything... A check for this could be good but for now, send it
     @Transactional
-    public void addMetadataToGif(UUID gifId, String name, String description) {
+    public void addMetadataToGif(UUID gifId, String name, String[] descriptions) {
         GifMetadata metadata = GifMetadata.findById(gifId);
         if (metadata == null) {
             throw new RuntimeException("Gif not found");
         }
         metadata.name = name;
-        metadata.description = description;
+        if (descriptions != null && descriptions.length > 0) {
+            metadata.descriptions = new HashSet<>(List.of(descriptions));
+        }
         metadata.persist();
 
         // vectorize gif metadata to chromaDB
@@ -116,18 +123,30 @@ public class GifService {
                 .build();
         Map<String, String> metadataMap = new HashMap<>();
         metadataMap.put(DOCUMENT_METADATA_DB_ID_KEY, gifId.toString());
-        var document = Document.from(description, Metadata.from(metadataMap));
-        ingestor.ingest(document);
+        metadata.descriptions.forEach(d -> {
+            var document = Document.from(d, Metadata.from(metadataMap));
+            ingestor.ingest(document);
+        });
     }
 
-    // this ensures that for each gif stored we have only one record in chromaDB
+    private void deleteDocumentInChromaByDatabaseId(String documentDatabaseId, String description) {
+        var collectionId = getChromaCollectionId();
+        // the collection was not created yet
+        if (collectionId == null)
+            return;
+        Map<String, String> metadataFilter = Map.of(DOCUMENT_METADATA_DB_ID_KEY, documentDatabaseId);
+        Map<String, String> documentTextSearch = Map.of("$contains", description);
+        var filter = Map.of("where", metadataFilter, "where_document", documentTextSearch);
+        chromaRestClient.deleteDocumentsByWhereFilter(collectionId, filter);
+    }
+
     private void deleteDocumentInChromaByDatabaseId(String documentDatabaseId) {
         var collectionId = getChromaCollectionId();
         // the collection was not created yet
         if (collectionId == null)
             return;
-        Map<String, String> innerFilter = Map.of(DOCUMENT_METADATA_DB_ID_KEY, documentDatabaseId);
-        var filter = Map.of("where", innerFilter);
+        Map<String, String> metadataFilter = Map.of(DOCUMENT_METADATA_DB_ID_KEY, documentDatabaseId);
+        var filter = Map.of("where", metadataFilter);
         chromaRestClient.deleteDocumentsByWhereFilter(collectionId, filter);
     }
 
@@ -167,16 +186,25 @@ public class GifService {
     }
 
     @Transactional
-    public Response deleteGif(UUID id) {
+    public Response deleteGif(UUID id, String description) {
         GifMetadata gifMetadata = GifMetadata.findById(id);
         if (gifMetadata == null) {
             return Response.status(Response.Status.NOT_FOUND).entity("GIF not found").build();
         }
-        deleteDocumentInChromaByDatabaseId(id.toString());
-        gifMetadata.delete();
-        Path destination = Path.of(uploadDir, gifMetadata.mediaDirectoryFileName);
-        File file = destination.toFile();
-        file.delete();
+        if (description == null) {
+            // delete all gif data
+            deleteDocumentInChromaByDatabaseId(id.toString());
+            gifMetadata.delete();
+            Path destination = Path.of(uploadDir, gifMetadata.mediaDirectoryFileName);
+            File file = destination.toFile();
+            file.delete();
+        } else {
+            // delete only one description
+            deleteDocumentInChromaByDatabaseId(id.toString(), description);
+            gifMetadata.descriptions = gifMetadata.descriptions.stream().filter(d -> !d.equals(description)).collect(Collectors.toSet());
+            gifMetadata.persist();
+        }
+
         return Response.ok().build();
     }
 }

@@ -71,14 +71,14 @@ public class GifController {
     @Produces(MediaType.APPLICATION_JSON)
     public Response updateGifMetadata(@PathParam("id") UUID id,
                                       @QueryParam("name") String name,
-                                      @QueryParam("description") String description){
+                                      @QueryParam("description") String[] description){
         gifService.addMetadataToGif(id, name, description);
         return Response.ok().build();
     }
 
     @DELETE
     @Path("/gif/{id}")
-    public Response deleteGif(@PathParam("id") UUID id) {
-        return gifService.deleteGif(id);
+    public Response deleteGif(@PathParam("id") UUID id, @QueryParam("description") String description) {
+        return gifService.deleteGif(id, description);
     }
 }

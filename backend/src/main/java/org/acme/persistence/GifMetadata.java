@@ -2,10 +2,9 @@ package org.acme.persistence;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;
-import org.hibernate.annotations.GenericGenerator;
 
 import java.time.OffsetDateTime;
-import java.util.UUID;
+import java.util.*;
 
 @Entity
 @Table(name = "gif_metadata")
@@ -16,7 +15,13 @@ public class GifMetadata extends PanacheEntityBase {
     protected OffsetDateTime created;
     protected OffsetDateTime updated;
     public String name;
-    public String description;
+    @ElementCollection
+    @CollectionTable(
+            name = "gif_descriptions",
+            joinColumns = @JoinColumn(name = "gif_id")
+    )
+    @Column(name = "description")
+    public Set<String> descriptions = new HashSet<>();
     @Column(name = "media_directory_file_name")
     public String mediaDirectoryFileName;
 

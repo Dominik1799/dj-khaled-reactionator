@@ -18,4 +18,31 @@
         </sql>
     </changeSet>
 
+    <changeSet id="create_gif_descriptions_mapping" author="dhorvath">
+        <sql>
+            -- Create a simple mapping table for gif descriptions
+            CREATE TABLE gif_descriptions (
+            gif_id UUID NOT NULL,
+            description TEXT NOT NULL,
+
+            -- Add foreign key constraint to link with gif_metadata
+            CONSTRAINT fk_gif_metadata FOREIGN KEY (gif_id)
+            REFERENCES gif_metadata(id) ON DELETE CASCADE,
+
+            -- Composite primary key
+            PRIMARY KEY (gif_id, description)
+            );
+
+            -- Migrate existing descriptions to the new table
+            INSERT INTO gif_descriptions (gif_id, description)
+            SELECT
+            id,
+            description
+            FROM gif_metadata
+            WHERE description IS NOT NULL AND description != '';
+
+            ALTER TABLE gif_metadata DROP COLUMN description;
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
