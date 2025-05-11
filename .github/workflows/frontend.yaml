@@ -1,11 +1,11 @@
-name: Build and deploy backend
+name: Build and deploy frontend
 
 on:
   push:
     branches:
       - main
     paths:
-      - frontend
+      - frontend/**
   workflow_dispatch:
 
 jobs:
@@ -29,3 +29,15 @@ jobs:
           push: true
           tags: |
             dominik9917/dj-khaled-reactionator-frontend:latest
+    #   - name: Deploy
+    #     uses: appleboy/ssh-action@v1.0.3
+    #     with:
+    #       host: ${{ secrets.DEPLOY_SERVER_IP }}
+    #       port: ${{ secrets.DEPLOY_SERVER_SSH_PORT }}
+    #       username: ${{ secrets.DEPLOY_SERVER_USER }}
+    #       password: ${{ secrets.DEPLOY_SERVER_USER_PASSWORD }}
+    #       script: |
+    #         cd ~/infrastructure
+    #         docker compose pull personal-page
+    #         docker compose up --force-recreate --no-deps personal-page -d
+    #         docker image prune -af
