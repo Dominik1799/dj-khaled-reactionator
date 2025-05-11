@@ -35,7 +35,7 @@ export async function GET(request) {
         created: gif.created,
         updated: gif.updated,
         name: gif.name,
-        description: gif.description,
+        descriptions: gif.descriptions,
         mediaDirectoryFileName: gif.mediaDirectoryFileName
       })),
       page: data.page,

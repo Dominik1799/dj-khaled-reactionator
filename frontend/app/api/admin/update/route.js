@@ -7,7 +7,10 @@ export async function PUT(request, { params }) {
         
         // Get query parameters
         const name = searchParams.get('name')  || "";
-        const description = searchParams.get('description');
+        const description = searchParams.getAll('description');
+        const descriptionsParam = description.map(desc => 
+            `description=${encodeURIComponent(desc)}`
+          ).join('&');
         const id = searchParams.get('id');
 
         // Validate UUID format (optional but recommended)
@@ -22,7 +25,7 @@ export async function PUT(request, { params }) {
         const API_URL = process.env.GIF_API_URL;
         // add name only if its not empty string and not null   
         const nameParameter = name.trim() !== "" ? `&name=${name}` : "";
-        const response = await fetch(`${API_URL}/gif/${id}?${nameParameter}&description=${description}`, {
+        const response = await fetch(`${API_URL}/gif/${id}?${nameParameter}&${descriptionsParam}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',

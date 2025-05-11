@@ -2,10 +2,13 @@
 
 import { useState, useEffect } from 'react';
 
-export default function GifUpdateCard({ id, name: initialName, description: initialDescription, mediaDirectoryFileName, gifDeletedTrigger, setGifDeletedTrigger }) {
+export default function GifUpdateCard({ id, name: initialName, descriptions: initialDescription, mediaDirectoryFileName, gifDeletedTrigger, setGifDeletedTrigger }) {
   const [gifUrl, setGifUrl] = useState(null);
   const [name, setName] = useState(initialName === null ? "" : initialName);
-  const [description, setDescription] = useState(initialDescription === null ? "" : initialDescription);
+  const [description, setDescription] = useState(
+    initialDescription === null ? [""] : 
+    Array.isArray(initialDescription) ? initialDescription : [initialDescription]
+  );
   const [isUpdating, setIsUpdating] = useState(false);
   const [updateSuccess, setUpdateSuccess] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -36,8 +39,9 @@ export default function GifUpdateCard({ id, name: initialName, description: init
   }, [id]);
 
   const handleUpdate = async () => {
-    if (!description.trim()) {
-      alert('Description cannot be empty');
+    // Check if any description is empty
+    if (description.some(desc => !desc.trim()) || description.length < 1) {
+      alert('Descriptions cannot be empty');
       return;
     }
 
@@ -45,7 +49,11 @@ export default function GifUpdateCard({ id, name: initialName, description: init
     setUpdateSuccess(false);
     try {
       const nameParameter = name.trim() !== "" ? `&name=${encodeURIComponent(name)}` : "";
-      const response = await fetch(`/api/admin/update?id=${id}&description=${encodeURIComponent(description)}${nameParameter}`, {
+      const descriptionsParam = description.map(desc => 
+        `description=${encodeURIComponent(desc)}`
+      ).join('&');
+      console.log(descriptionsParam)
+      const response = await fetch(`/api/admin/update?id=${id}&${descriptionsParam}${nameParameter}`, {
         method: 'PUT',
       });
 
@@ -87,6 +95,22 @@ export default function GifUpdateCard({ id, name: initialName, description: init
     }
   };
 
+  const addDescription = () => {
+    setDescription([...description, '']);
+  };
+
+  const removeDescription = (index) => {
+    if (description.length > 1) {
+      setDescription(description.filter((_, i) => i !== index));
+    }
+  };
+
+  const updateDescription = (index, value) => {
+    const newDescriptions = [...description];
+    newDescriptions[index] = value;
+    setDescription(newDescriptions);
+  };
+
   return (
     <div className="w-full max-w-2xl bg-white rounded-lg shadow-md p-6 mb-4">
       <div className="flex flex-col gap-4">
@@ -116,22 +140,39 @@ export default function GifUpdateCard({ id, name: initialName, description: init
           />
         </div>
         
-        {/* Description Input */}
+        {/* Description Inputs */}
         <div className="flex flex-col gap-2">
-          <label htmlFor="description" className="text-gray-700 font-medium">Description</label>
-          <input
-            type="text"
-            id="description"
-            className="border border-gray-300 rounded-md p-2"
-            placeholder="Enter reaction description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                handleUpdate();
-              }
-            }}
-          />
+          <label className="text-gray-700 font-medium">Descriptions</label>
+          {description.map((desc, index) => (
+            <div key={index} className="flex gap-2">
+              <input
+                type="text"
+                className="border border-gray-300 rounded-md p-2 flex-grow"
+                placeholder={`Enter reaction description ${index + 1}`}
+                value={desc}
+                onChange={(e) => updateDescription(index, e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleUpdate();
+                  }
+                }}
+              />
+              {description.length > 1 && (
+                <button
+                  className="px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
+                  onClick={() => removeDescription(index)}
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+          ))}
+          <button
+            className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors mt-2 cursor-pointer"
+            onClick={addDescription}
+          >
+            Add Description
+          </button>
         </div>
         
         {/* Action Buttons */}

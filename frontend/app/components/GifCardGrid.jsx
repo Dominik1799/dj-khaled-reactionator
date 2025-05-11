@@ -62,7 +62,7 @@ export default function GifCardGrid() {
             key={gif.id}
             id={gif.id}
             name={gif.name}
-            description={gif.description}
+            descriptions={gif.descriptions}
             mediaDirectoryFileName={gif.mediaDirectoryFileName}
             gifDeletedTrigger={gifDeletedTrigger}
             setGifDeletedTrigger={setGifDeletedTrigger} 
