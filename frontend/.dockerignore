@@ -1,0 +1,6 @@
+node_modules/
+.next/
+.github/
+docker-compose.yaml
+README.md
+.env*.local
