@@ -182,6 +182,7 @@ public class GifService {
         var searchResult = retriever.retrieve(Query.from(query));
         return searchResult.stream()
                 .map(sr -> sr.textSegment().metadata().getString(DOCUMENT_METADATA_DB_ID_KEY))
+                .distinct()
                 .toList();
     }
 
