@@ -11,6 +11,9 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 ENV NEXT_TELEMETRY_DISABLED=1
+ARG BASE_PATH=""
+ENV BASE_PATH=${BASE_PATH}
+RUN sed -i "s|basePath: ''|basePath: '${BASE_PATH}'|" next.config.mjs
 RUN npm run build
 
 FROM node:18-alpine AS runner

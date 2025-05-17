@@ -3,3 +3,6 @@
 *.gif
 venv
 .idea
+deployment/chroma-data
+deployment/postgres-data
+deployment/**/*.env

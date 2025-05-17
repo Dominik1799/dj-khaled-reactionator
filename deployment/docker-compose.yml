@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  chromadb:
+    image: ghcr.io/chroma-core/chroma:0.4.15
+    container_name: chromadb
+    restart: unless-stopped
+    volumes:
+      - ./chroma-data:/data
+    networks:
+      - dominikh-docker-network
+  postgres:
+    image: postgres:17
+    container_name: postgresdb
+    restart: unless-stopped
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+    env_file:
+      - config/postgres.env
+    networks:
+      - dominikh-docker-network
+  dj-khaled-reactionator-backend:
+    image: dominik9917/dj-khaled-reactionator-backend:latest
+    container_name: dj-khaled-reactionator-backend
+    restart: unless-stopped
+    volumes: 
+      - ./stored-gifs:/stored-gifs
+    env_file:
+      - config/backend.env
+    depends_on:
+      - postgres
+      - chromadb
+    networks:
+      - dominikh-docker-network
+  
+  dj-khaled-reactionator-frontend:
+    image: dominik9917/dj-khaled-reactionator-frontend:latest
+    container_name: dj-khaled-reactionator-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    env_file:
+      - config/frontend.env
+    networks:
+      - dominikh-docker-network
+
+
+networks:
+  dominikh-docker-network:
+    external: true
