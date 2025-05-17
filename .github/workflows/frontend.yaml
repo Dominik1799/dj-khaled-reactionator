@@ -26,9 +26,9 @@ jobs:
         with:
           context: ./frontend
           file: ./frontend/Dockerfile
-          push: true
-          build-args:
-            -'BASE_PATH=/dj-khaled-reactionator'
+          push: truedocker/build-push-action@v5
+          build-args: |
+            BASE_PATH=/dj-khaled-reactionator
           tags: |
             dominik9917/dj-khaled-reactionator-frontend:latest
     #   - name: Deploy
