@@ -16,7 +16,8 @@ export default function GifUpdateCard({ id, name: initialName, descriptions: ini
   useEffect(() => {
     const fetchGif = async () => {
       try {
-        const response = await fetch(`/api/gifMedia?id=${id}`);
+        const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+        const response = await fetch(`${basePath}/api/gifMedia?id=${id}`);
         if (!response.ok) {
           throw new Error('Failed to fetch GIF');
         }
@@ -53,7 +54,8 @@ export default function GifUpdateCard({ id, name: initialName, descriptions: ini
         `description=${encodeURIComponent(desc)}`
       ).join('&');
       console.log(descriptionsParam)
-      const response = await fetch(`/api/admin/update?id=${id}&${descriptionsParam}${nameParameter}`, {
+      const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+      const response = await fetch(`${basePath}/api/admin/update?id=${id}&${descriptionsParam}${nameParameter}`, {
         method: 'PUT',
       });
 
@@ -78,7 +80,8 @@ export default function GifUpdateCard({ id, name: initialName, descriptions: ini
 
     setIsDeleting(true);
     try {
-      const response = await fetch(`/api/admin/delete?id=${id}`, {
+      const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+      const response = await fetch(`${basePath}/api/admin/delete?id=${id}`, {
         method: 'DELETE',
       });
 

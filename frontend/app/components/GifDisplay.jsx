@@ -9,7 +9,8 @@ export default function GifDisplay({ id }) {
 
   const handleDownload = async () => {
     try {
-      const response = await fetch(`/api/gifMedia?id=${id}`);
+      const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+      const response = await fetch(`${basePath}/api/gifMedia?id=${id}`);
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -29,8 +30,8 @@ export default function GifDisplay({ id }) {
       try {
         setLoading(true);
         setError(null);
-        
-        const response = await fetch(`/api/gifMedia?id=${id}`);
+        const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+        const response = await fetch(`${basePath}/api/gifMedia?id=${id}`);
         
         if (!response.ok) {
           throw new Error('Failed to fetch GIF');

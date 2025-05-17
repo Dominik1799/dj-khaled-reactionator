@@ -21,7 +21,8 @@ export default function GifUpload() {
       });
   
       try {
-        const response = await fetch('/api/admin/upload', {
+        const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+        const response = await fetch(`${basePath}/api/admin/upload`, {
           method: 'POST',
           body: formData,
         });

@@ -15,7 +15,8 @@ export default function SearchArea() {
       }
       setSearchResults([]);
       setIsLoading(true);
-      const response = await fetch(`/api/searchGif?query=${encodeURIComponent(searchQuery)}`);
+      const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+      const response = await fetch(`${basePath}/api/searchGif?query=${encodeURIComponent(searchQuery)}`);
       if (!response.ok) {
         throw new Error('Search failed');
       }

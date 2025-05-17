@@ -16,7 +16,8 @@ export default function GifCardGrid() {
     const fetchGifs = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`/api/gif?page=${page}&pageSize=10&onlyNullDescription=${onlyNullDescription}`);
+        const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+        const response = await fetch(`${basePath}/api/gif?page=${page}&pageSize=10&onlyNullDescription=${onlyNullDescription}`);
         
         if (!response.ok) {
           throw new Error('Failed to fetch GIFs');
