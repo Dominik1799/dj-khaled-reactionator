@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   chromadb:
     image: ghcr.io/chroma-core/chroma:0.4.15
@@ -24,7 +22,7 @@ services:
     container_name: dj-khaled-reactionator-backend
     restart: unless-stopped
     volumes: 
-      - ./stored-gifs:/stored-gifs
+      - ./stored-gifs:/work/stored-gifs
     env_file:
       - config/backend.env
     depends_on:

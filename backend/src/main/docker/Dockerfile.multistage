@@ -13,6 +13,7 @@ RUN ./mvnw package -Dnative
 ## Stage 2 : create the docker final image
 FROM quay.io/quarkus/ubi9-quarkus-micro-image:2.0
 WORKDIR /work/
+RUN mkdir /work/stored-gifs
 COPY --from=build /code/target/*-runner /work/application
 
 # set up permissions for user `1001`
