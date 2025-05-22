@@ -22,7 +22,7 @@ services:
     container_name: dj-khaled-reactionator-backend
     restart: unless-stopped
     volumes: 
-      - ./stored-gifs:/work/stored-gifs
+      - './stored-gifs:/work/penis'
     env_file:
       - config/backend.env
     depends_on:

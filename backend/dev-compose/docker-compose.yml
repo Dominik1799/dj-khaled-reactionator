@@ -12,7 +12,9 @@ services:
     ports:
       - "15432:8000"
     volumes:
-      - ./chroma-data:/data
+      - ./chroma-data:/chroma/chroma
+    environment:
+      - IS_PERSISTENT=TRUE  
   postgres:
     image: postgres:17
     container_name: postgres_db
