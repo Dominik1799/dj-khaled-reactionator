@@ -41,7 +41,7 @@ export default function SearchArea() {
         <div className="relative flex-grow">
           <input
             type="text"
-            placeholder="Search..."
+            placeholder="How are you feeling?"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyDown={handleKeyPress}
